@@ -1,0 +1,66 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
+
+contract GamaCoin is ERC20Burnable, AccessControl {
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+    bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
+    bytes32 public constant GAME_CONTRACT_ROLE = keccak256("GAME_CONTRACT_ROLE");
+
+    constructor() ERC20("Gama Coin", "GAMA") {
+        _mint(msg.sender, 100000000 * (10 ** uint256(decimals()))); // 100 million tokens with decimals
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _grantRole(MINTER_ROLE, msg.sender);
+        _grantRole(BURNER_ROLE, msg.sender);
+        _grantRole(GAME_CONTRACT_ROLE, msg.sender); // Grant GAME_CONTRACT_ROLE to the deployer initially
+    }
+
+    // Grant the MINTER_ROLE to an address
+    function grantMinterRole(address account) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        grantRole(MINTER_ROLE, account);
+    }
+
+    // Revoke the MINTER_ROLE from an address
+    function revokeMinterRole(address account) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        revokeRole(MINTER_ROLE, account);
+    }
+
+    // Grant the BURNER_ROLE to an address
+    function grantBurnerRole(address account) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        grantRole(BURNER_ROLE, account);
+    }
+
+    // Revoke the BURNER_ROLE from an address
+    function revokeBurnerRole(address account) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        revokeRole(BURNER_ROLE, account);
+    }
+
+    // Grant the GAME_CONTRACT_ROLE to an address
+    function grantGameContractRole(address account) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        grantRole(GAME_CONTRACT_ROLE, account);
+    }
+
+    // Revoke the GAME_CONTRACT_ROLE from an address
+    function revokeGameContractRole(address account) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        revokeRole(GAME_CONTRACT_ROLE, account);
+    }
+
+    // Mint new tokens to an address
+    function mint(address to, uint256 amount) public onlyRole(MINTER_ROLE) {
+        _mint(to, amount);
+    }
+
+    // Burn tokens from an address
+    function burn(address from, uint256 amount) public onlyRole(BURNER_ROLE) {
+        _burn(from, amount);
+    }
+
+    // Mint and transfer tokens to a player
+    function mintAndTransfer(address to, uint256 amount) public onlyRole(GAME_CONTRACT_ROLE) {
+        _mint(to, amount);
+        emit Transfer(address(0), to, amount);
+    }
+}
