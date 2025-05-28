@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
-import "@openzeppelin/contracts/security/Pausable.sol";
+import "@openzeppelin/contracts/utils/Pausable.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 
 contract GamaToken is ERC20, AccessControl, Pausable, ERC20Burnable {
@@ -80,20 +80,6 @@ contract GamaToken is ERC20, AccessControl, Pausable, ERC20Burnable {
         require(!isBlacklisted[msg.sender], "Approver is blacklisted");
         require(!isBlacklisted[spender], "Spender is blacklisted");
         return super.approve(spender, amount);
-    }
-
-    function increaseAllowance(address spender, uint256 addedValue) public override returns (bool) {
-        require(!paused(), "Increase allowance while paused");
-        require(!isBlacklisted[msg.sender], "Sender is blacklisted");
-        require(!isBlacklisted[spender], "Spender is blacklisted");
-        return super.increaseAllowance(spender, addedValue);
-    }
-
-    function decreaseAllowance(address spender, uint256 subtractedValue) public override returns (bool) {
-        require(!paused(), "Decrease allowance while paused");
-        require(!isBlacklisted[msg.sender], "Sender is blacklisted");
-        require(!isBlacklisted[spender], "Spender is blacklisted");
-        return super.decreaseAllowance(spender, subtractedValue);
     }
 
     function burn(uint256 amount) public override whenNotPaused onlyRole(BURNER_ROLE) {
