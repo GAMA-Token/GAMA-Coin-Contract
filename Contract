@@ -70,18 +70,15 @@ contract GamaToken is ERC20, AccessControl, Pausable, ERC20Burnable {
         return super.approve(spender, amount);
     }
 
-    function burn(uint256 amount) public override whenNotPaused onlyRole(BURNER_ROLE) {
-        require(!isBlacklisted[msg.sender], "Caller is blacklisted");
-        require(_totalMinted >= amount, "Burn exceeds minted total");
+    function burn(uint256 amount) public override whenNotPaused {
         super.burn(amount);
+        require(_totalMinted >= amount, "Burn exceeds minted total");
         _totalMinted -= amount;
     }
 
-    function burnFrom(address account, uint256 amount) public override whenNotPaused onlyRole(BURNER_ROLE) {
-        require(!isBlacklisted[msg.sender], "Caller is blacklisted");
-        require(!isBlacklisted[account], "Account is blacklisted");
-        require(_totalMinted >= amount, "Burn exceeds minted total");
+    function burnFrom(address account, uint256 amount) public override whenNotPaused {
         super.burnFrom(account, amount);
+        require(_totalMinted >= amount, "Burn exceeds minted total");
         _totalMinted -= amount;
     }
 
@@ -100,6 +97,7 @@ contract GamaToken is ERC20, AccessControl, Pausable, ERC20Burnable {
             address recipient = recipients[i];
             require(!isBlacklisted[recipient], "Recipient is blacklisted");
             _mint(recipient, amount);
+            _totalMinted += amount;
             emit Airdrop(recipient, amount);
         }
     }
@@ -121,4 +119,3 @@ contract GamaToken is ERC20, AccessControl, Pausable, ERC20Burnable {
         return _maxMintable - _totalMinted;
     }
 }
-
