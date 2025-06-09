@@ -92,14 +92,29 @@ contract GamaToken is ERC20, AccessControl, Pausable, ERC20Burnable {
         emit SubAdminLimitUpdated(subAdmin, limit);
     }
 
-    function airdrop(address[] memory recipients, uint256 amount) external onlyRole(DEFAULT_ADMIN_ROLE) whenNotPaused {
+    function airdrop(address[] memory recipients, uint256[] memory amounts)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        whenNotPaused
+    {
+        require(recipients.length == amounts.length, "Recipients and amounts arrays must have the same length");
+
+        uint256 totalAmount = 0;
+        for (uint256 i = 0; i < amounts.length; i++) {
+            totalAmount += amounts[i];
+        }
+
+        require(_totalMinted + totalAmount <= _maxMintable, "Max mintable limit exceeded");
+
         for (uint256 i = 0; i < recipients.length; i++) {
             address recipient = recipients[i];
+            uint256 amount = amounts[i];
             require(!isBlacklisted[recipient], "Recipient is blacklisted");
             _mint(recipient, amount);
-            _totalMinted += amount;
             emit Airdrop(recipient, amount);
         }
+
+        _totalMinted += totalAmount;
     }
 
     function setMaxMintable(uint256 newMaxMintable) external onlyRole(DEFAULT_ADMIN_ROLE) {
